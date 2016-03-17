@@ -1,0 +1,23 @@
+{
+  "name": "node-red-contrib-seneca",
+  "version": "0.1.0",
+  "description": "A node-red node for connecting to microservices written in seneca.js.",
+  "keywords": [
+    "node-red",
+    "senecajs",
+    "seneca",
+    "flow",
+    "microservice"
+  ],
+  "node-red": {
+    "nodes": {
+      "seneca": "seneca.js"
+    }
+  },
+  "author": "John O'Connor (sax1johno@gmail.com)",
+  "license": "MIT",
+  "dependencies": {
+    "node-red": "^0.13.3",
+    "seneca": "^1.4.0"
+  }
+}
