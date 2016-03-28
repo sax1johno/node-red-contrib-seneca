@@ -8,9 +8,8 @@ module.exports = function(RED) {
     "use strict";
     // require any external libraries we may need....
     //var foo = require("foo-library");
-    var seneca = require('seneca'),
-        senecaInstance,
-        client;
+    // Statics go here.
+    var seneca = require('seneca');
     
     // The main node definition - most things happen in here
     function SenecaNode(config) {
@@ -33,18 +32,19 @@ module.exports = function(RED) {
                 this.connectionObject = JSON.parse(this.connectionObject);
                 console.error("connection is ", this.connectionObject);
                 console.error("type of connectionObject is ", typeof(this.connectionObject));
-                senecaInstance = seneca();
-                client = senecaInstance.client(this.connectionObject);
-                // console.error("connection type = ", this.connectionObject);
-                senecaInstance.ready(function() {
+                this.senecaInstance = seneca();
+                this.client = this.senecaInstance.client(this.connectionObject);
+                this.senecaInstance.ready(function() {
                     node.on('input', function (msg) {
                         // msg.payload contains the command object.
                         // in this example just send it straight on... should process it here really
                         this.status({fill:"blue",shape:"dot",text:"processing"});
-                        client.act(msg.payload, function(err, result) {
+                        console.error("connection type = ", this.connectionObject);
+                        this.client.act(msg.payload, function(err, result) {
                             if (err) {
                                 node.error(err);
                                 node.status({fill:"green",shape:"dot",text:"connected"});
+                                node.send(err);
                             } else {
                                 msg.payload.result = result;
                                 node.send(msg);
@@ -57,7 +57,7 @@ module.exports = function(RED) {
                         // Called when the node is shutdown - eg on redeploy.
                         // Allows ports to be closed, connections dropped etc.
                         // eg: node.client.disconnect();
-                        senecaInstance.close(function(err) {
+                        this.senecaInstance.close(function(err) {
                             node.error(err); 
                         });                    
                     });
