@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-seneca",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A node-red node for connecting to microservices written in seneca.js.",
   "keywords": [
     "node-red",
