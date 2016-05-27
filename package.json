@@ -17,6 +17,7 @@
   "author": "John O'Connor (sax1johno@gmail.com)",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.4.0",
     "node-red": "^0.13.3",
     "seneca": "^1.4.0"
   }

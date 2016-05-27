@@ -18,7 +18,7 @@
    wish to send to seneca</p>
    <p>Outputs an object called <code>msg</code> containing
    <code>msg.payload</code>. msg.payload is a String with the results returned
-   from the seneca service.</p>
+   from the seneca service.  If an error is encountered, the second output is sent.</p>
 </script>
 
 <script type="text/javascript">
@@ -30,7 +30,7 @@
         },
         color: "#3f33ff",
         inputs:1,               // set the number of inputs - only 0 or 1
-        outputs:1,              // set the number of outputs - 0 to n
+        outputs:2,              // set the number of outputs - 0 to n
         // set the icon (held in icons dir below where you save the node)
         icon: "myicon.png",     // saved in  icons/myicon.png
         label: function() {     // sets the default label contents

@@ -10,6 +10,7 @@ module.exports = function(RED) {
     //var foo = require("foo-library");
     // Statics go here.
     var seneca = require('seneca');
+    var Promise = require('bluebird');
     
     // The main node definition - most things happen in here
     function SenecaNode(config) {
@@ -40,17 +41,19 @@ module.exports = function(RED) {
                         // in this example just send it straight on... should process it here really
                         this.status({fill:"blue",shape:"dot",text:"processing"});
                         console.error("connection type = ", this.connectionObject);
-                        this.client.act(msg.payload, function(err, result) {
-                            if (err) {
+                        
+                        var act = Promise.promisify(this.client.act, {context: this.client});
+                        act(msg.payload)
+                          .then(function (result) {
+                                msg.payload.result = result;
+                                node.send([msg, null]);
+                                node.status({fill:"green",shape:"dot",text:"connected"});
+                          })
+                          .catch(function (err) {
                                 node.error(err);
                                 node.status({fill:"green",shape:"dot",text:"connected"});
-                                node.send(err);
-                            } else {
-                                msg.payload.result = result;
-                                node.send(msg);
-                                node.status({fill:"green",shape:"dot",text:"connected"});
-                            }
-                        });
+                                node.send([null, err]);
+                          });
                     });
             
                     node.on("close", function() {
