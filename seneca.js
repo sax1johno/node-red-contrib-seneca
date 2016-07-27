@@ -66,18 +66,18 @@ module.exports = function(RED) {
                             this.client.act(msg.payload, function(err, result) {
                                 if (!err) {
                                     msg.payload.result = result;
-                                    node.send([null, msg]);
+                                    node.send([msg, null]);
                                     node.status({fill: "green", shape: "dot", text: "connected"});
                                 } else {
                                     node.error(err);
                                     node.status({fill: "green", shape: "dot", text: "connected"});
-                                    node.send([err, null]);
+                                    node.send([null, err]);
                                 }
                             });                            
                         } catch (e) {
                             node.error(e);
                             node.status({fill: "green", shape: "dot", text: "connected"});
-                            node.send([err, null]);
+                            node.send([null, err]);
                         }
                     });
 
