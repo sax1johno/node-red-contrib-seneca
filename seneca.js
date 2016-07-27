@@ -33,11 +33,12 @@ module.exports = function(RED) {
                 this.connectionObject = JSON.parse(this.connectionObject);
                 console.error("connection is ", this.connectionObject);
                 console.error("type of connectionObject is ", typeof(this.connectionObject));
+                var that = this; // Expose value of main context to error callback.
                 this.senecaInstance = seneca(
                     {
                         errhandler: function( err ) {
                             console.log("Seneca error: ", err);
-                            console.log("Config for errored service is ", this.connectionObject);
+                            console.log("Config for errored service is ", that.connectionObject);
                         }
                     }
                 );
