@@ -10,7 +10,8 @@ module.exports = function(RED) {
     //var foo = require("foo-library");
     // Statics go here.
     var seneca = require('seneca');
-    
+    var Promise = require('bluebird');
+
     // The main node definition - most things happen in here
     function SenecaNode(config) {
         // Create a RED node
@@ -32,7 +33,14 @@ module.exports = function(RED) {
                 this.connectionObject = JSON.parse(this.connectionObject);
                 console.error("connection is ", this.connectionObject);
                 console.error("type of connectionObject is ", typeof(this.connectionObject));
-                this.senecaInstance = seneca();
+                this.senecaInstance = seneca(
+                    {
+                        errhandler: function( err ) {
+                            console.log("Seneca error: ", err);
+                            console.log("Config for errored service is ", this.connectionObject);
+                        }
+                    }
+                );
                 this.client = this.senecaInstance.client(this.connectionObject);
                 this.senecaInstance.ready(function() {
                     node.on('input', function (msg) {
@@ -40,31 +48,33 @@ module.exports = function(RED) {
                         // in this example just send it straight on... should process it here really
                         this.status({fill:"blue",shape:"dot",text:"processing"});
                         console.error("connection type = ", this.connectionObject);
-                        this.client.act(msg.payload, function(err, result) {
-                            if (err) {
+
+                        var act = Promise.promisify(this.client.act, {context: this.client});
+                        this.client.act(msg.payload)
+                          .then(function (result) {
+                                msg.payload.result = result;
+                                node.send([null, msg]);
+                                node.status({fill:"green",shape:"dot",text:"connected"});
+                          })
+                          .catch(function (err) {
                                 node.error(err);
                                 node.status({fill:"green",shape:"dot",text:"connected"});
-                                node.send(err);
-                            } else {
-                                msg.payload.result = result;
-                                node.send(msg);
-                                node.status({fill:"green",shape:"dot",text:"connected"});
-                            }
-                        });
+                                node.send([err, null]);
+                          });
                     });
-            
+
                     node.on("close", function() {
                         // Called when the node is shutdown - eg on redeploy.
                         // Allows ports to be closed, connections dropped etc.
                         // eg: node.client.disconnect();
                         this.senecaInstance.close(function(err) {
-                            node.error(err); 
-                        });                    
+                            node.error(err);
+                        });
                     });
-                    
+
                     // node.on("node-status", function() {
                     // })
-    
+
                     node.status({fill:"green",shape:"dot",text:"connected"});
                 });
             } catch (e) {
@@ -81,8 +91,8 @@ module.exports = function(RED) {
     // Register the node by name. This must be called before overriding any of the
     // Node functions.
     RED.nodes.registerType("seneca",SenecaNode);
-    
-    
+
+
     // Register the configuration node
     function SenecaConfigNode(n) {
         RED.nodes.createNode(this,n);
