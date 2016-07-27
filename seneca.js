@@ -50,18 +50,35 @@ module.exports = function(RED) {
                         this.status({fill:"blue",shape:"dot",text:"processing"});
                         console.error("connection type = ", this.connectionObject);
 
-                        var act = Promise.promisify(this.client.act, {context: this.client});
-                        this.client.act(msg.payload)
-                          .then(function (result) {
-                                msg.payload.result = result;
-                                node.send([null, msg]);
-                                node.status({fill:"green",shape:"dot",text:"connected"});
-                          })
-                          .catch(function (err) {
-                                node.error(err);
-                                node.status({fill:"green",shape:"dot",text:"connected"});
-                                node.send([err, null]);
-                          });
+                        // var act = Promise.promisify(this.client.act, {context: this.client});
+                        // this.client.act(msg.payload)
+                        //   .then(function (result) {
+                        //         msg.payload.result = result;
+                        //         node.send([null, msg]);
+                        //         node.status({fill:"green",shape:"dot",text:"connected"});
+                        //   })
+                        //   .catch(function (err) {
+                        //         node.error(err);
+                        //         node.status({fill:"green",shape:"dot",text:"connected"});
+                        //         node.send([err, null]);
+                        //   });
+                        try {
+                            this.client.act(msg.payload, function(err, result) {
+                                if (!err) {
+                                    msg.payload.result = result;
+                                    node.send([null, msg]);
+                                    node.status({fill: "green", shape: "dot", text: "connected"});
+                                } else {
+                                    node.error(err);
+                                    node.status({fill: "green", shape: "dot", text: "connected"});
+                                    node.send([err, null]);
+                                }
+                            });                            
+                        } catch (e) {
+                            node.error(e);
+                            node.status({fill: "green", shape: "dot", text: "connected"});
+                            node.send([err, null]);
+                        }
                     });
 
                     node.on("close", function() {
